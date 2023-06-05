@@ -52,39 +52,3 @@ for i in rs_layers:
     if os.path.exists(api_file_name):
         os.remove(api_file_name)
     arcpy.CopyRaster_management(in_raster=outname, out_rasterdataset=api_file_name)
-
-############
-# outname = f"{rs_layer}_{dirs.clip_boundary_name}"
-#
-#
-# GHS_BUILT_S_E2018_GLOBE_R2022A_54009_10_V1_0_R9_C22.tif
-#
-# ghs_raw1 = arcpy.Raster(r"C:\Users\DominicH\Desktop\GHS\GHS_SMOD_E2020_GLOBE_R2022A_54009_1000_V1_0_R9_C22.tif")
-# ghs_raw2 = arcpy.Raster(r"C:\Users\DominicH\Desktop\GHS\GHS_SMOD_E2020_GLOBE_R2022A_54009_1000_V1_0_R10_C22.tif")
-#
-# arcpy.MosaicToNewRaster_management(input_rasters=[ghs_raw1, ghs_raw2],
-#                                    output_location=gdb_dir,
-#                                    raster_dataset_name_with_extension="ghs_merge",
-#                                    number_of_bands=1)
-#
-# arcpy.env.workspace = gdb_dir
-# arcpy.Clip_management(in_raster="ghs_merge", out_raster=os.path.join(gdb_dir, outname),
-#                       in_template_dataset=os.path.join(os.path.join(dirs.proj_dir,
-#                                                                     "Boundaries.gdb", dirs.clip_boundary_name)),
-#                       clipping_geometry="ClippingGeometry",
-#                       nodata_value=0, maintain_clipping_extent="NO_MAINTAIN_EXTENT")
-#
-# arcpy.Delete_management(in_data="ghs_merge")
-#
-# # Add color map
-# # arcpy.AddColormap_management(in_raster=os.path.join(gdb_dir, outname),
-# #                              in_template_raster=None,
-# #                              input_CLR_file=r"C:\Users\DominicH\Desktop\GHS"
-# #                                             r"\GHS_SMOD_E2020_GLOBE_R2022A_54009_1000_V1_0_R9_C22.clr")
-#
-#
-# # Copy to API
-# api_file_name = os.path.join(dirs.api_input_dir, re.sub(".gdb", "", gdb_name), outname + ".tif")
-# if os.path.exists(api_file_name):
-#     os.remove(api_file_name)
-# arcpy.CopyRaster_management(in_raster=outname, out_rasterdataset=api_file_name)
