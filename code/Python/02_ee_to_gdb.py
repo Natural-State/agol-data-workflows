@@ -51,7 +51,6 @@ for i in rs_layer_list:
     for y in check_layers:
         if arcpy.Exists(y):
             arcpy.Delete_management(y)
-    end_time_del = time.time()
 
     # Import layers  into GDB
     if data_type == "Raster":
