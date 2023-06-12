@@ -9,6 +9,9 @@
 ##        {whitebox} will need to install a
 ##        whitebox tools exe - follow the prompts after loading.
 
+# If running code for the first time use restore the R library from the renv.lock file
+# renv::restore()
+
 ## Libraries
 library(terra)
 library(glue)
@@ -16,9 +19,6 @@ library(whitebox)
 library(readxl)
 library(tidyverse)
 library(sf)
-
-## SETUP RENV WORKFLOW ##
-# https://rstudio.github.io/renv/articles/renv.html
 
 ## ________________________________________________________________________
 
