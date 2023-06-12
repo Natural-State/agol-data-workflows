@@ -22,3 +22,5 @@
 /api_input/
 /agol-data-workflows.gdb/
 /Administrative.gdb/
+.Rproj.user
+/renv/
