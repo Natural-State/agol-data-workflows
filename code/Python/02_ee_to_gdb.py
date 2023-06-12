@@ -6,6 +6,12 @@ import re
 import pandas as pd
 import time
 from zipfile import ZipFile
+import logging
+
+# Set up logging config
+logging.basicConfig(filename='logfile_02.log', filemode="a", level=logging.INFO,
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger('EE-to-GDB logger')
 
 # Import metadata sheet
 metadata = pd.read_excel(dirs.metadata_dir, sheet_name="AGOL_properties")
@@ -14,20 +20,18 @@ metadata = metadata.set_index("Layer ID")
 # Define which RS layers need to be processed (rs_layer_list = ["RS_005"])
 
 # Choose layer start and end points
-start, end = 5, 7
+start, end = 13, 13
 rs_layer_list = ["RS_{id:03d}".format(id=i) for i in range(start, end + 1)]
-print(rs_layer_list)
 
 # Alternative specification using layer sequence
 # layer_seq = [*range(1, 3+1), 5, *range(25, 31+1)]
 # rs_layer_list = ["RS_{id:03d}".format(id=i) for i in layer_seq]
-# print(rs_layer_list)
 
 start_processing = time.time()
 
 # i = rs_layer_list[0]
 for i in rs_layer_list:
-    print("STARTING LAYER: " + i)
+    logger.info(f"Starting layer: {i}")
     gdb_name = metadata.at[i, "GDB"] + ".gdb"
     gdb_dir = os.path.join(dirs.proj_dir, gdb_name)
     data_type = metadata.at[i, "Data type"]
@@ -38,14 +42,12 @@ for i in rs_layer_list:
     lyr_pattern = "*" + i + file_ext
     # Read layer list from GEE folder
     layer_list = glob.glob(os.path.join(dirs.gee_dir, lyr_pattern))
-    print(layer_list)
 
     # Remove existing layers (because overwriting doesn't seem to work)
     check_layers = []
     for r in layer_list:
         match = re.search(r'\\([^\\]*)\.tif$', r) if data_type == "Raster" else re.search(r'\\([^\\]*)\.shp$', r)
         check_layers.append(match.group(1))
-    print(check_layers)
 
     arcpy.env.workspace = gdb_dir
     for y in check_layers:
@@ -60,16 +62,16 @@ for i in rs_layer_list:
             match = re.search(r'\\([^\\]*)\.tif$', x)
             copy_ras_name = os.path.join(gdb_dir, match.group(1))
             arcpy.Rename_management(in_data="temp_ras", out_data=copy_ras_name)
-            print("IMPORT COMPLETE: " + copy_ras_name)
+            logger.info(f"Import complete: {copy_ras_name}")
 
     elif data_type == "Vector":
         arcpy.env.workspace = gdb_dir
         for x in layer_list:
             arcpy.FeatureClassToGeodatabase_conversion(Input_Features=x, Output_Geodatabase=gdb_dir)
-            print("IMPORT COMPLETE: " + x)
+            logger.info(f"Import complete: {x}")
 
         if clip_layer:
-            print("Start clipping")
+            logger.info(f"Start clipping")
             arcpy.env.overwriteOutput = True
             # c = check_layers[0]
             for c in check_layers:
@@ -81,7 +83,7 @@ for i in rs_layer_list:
                                     out_feature_class=vec_name + "_clip")
                 arcpy.Delete_management(in_data=vec_name)
                 arcpy.Rename_management(in_data=vec_name + "_clip", out_data=vec_name)
-                print("Clipping complete for layer: " + c)
+                logger.info(f"Clipping complete for layer {c}")
 
     # Export layer to api_input
     arcpy.env.workspace = gdb_dir
@@ -107,7 +109,7 @@ for i in rs_layer_list:
         for y in check_layers:
             lyr_pattern = y + "*"
             vector_files = glob.glob(os.path.join(dirs.api_input_dir, re.sub(".gdb", "", gdb_name), lyr_pattern))
-            print(vector_files)
+            # print(vector_files)
             # Define the name and path of the output zip file
             zip_filename = os.path.join(dirs.api_input_dir, re.sub(".gdb", "", gdb_name), y + ".zip")
             # Open the output zip file in write mode
@@ -121,11 +123,9 @@ for i in rs_layer_list:
         for x in range(len(layer_list)):
             if os.path.exists(os.path.join(dirs.move_dir, check_layers[x] + ".tif")):
                 os.remove(os.path.join(dirs.move_dir, check_layers[x] + ".tif"))
-                print("FILE REMOVED:" + check_layers[x])
-            else:
-                print("NO FILE EXISTS")
+
             os.replace(layer_list[x], os.path.join(dirs.move_dir, check_layers[x] + ".tif"))
-            print("LAYER MOVED:" + check_layers[x])
+            logger.info(f"Layer moved: {check_layers[x]}")
 
     elif data_type == "Vector":
         for y in check_layers:
@@ -134,9 +134,9 @@ for i in rs_layer_list:
                 os.replace(v, os.path.join(dirs.move_dir, v.rsplit('\\', 1)[1]))
 
     # Check GDB
-    print(arcpy.ListRasters("*", raster_type="All")) if data_type == "Raster" else print(arcpy.ListFeatureClasses())
-    print("FINISHED LAYER: " + i)
+    # print(arcpy.ListRasters("*", raster_type="All")) if data_type == "Raster" else print(arcpy.ListFeatureClasses())
+    logger.info(f"Finished layer: {i}")
 
 end_processing = time.time()
 
-print("TOTAL PROCESSING TIME (MINS): " + str((end_processing - start_processing)/60))
+logger.warning(f"Total processing time (minutes): {str((end_processing - start_processing)/60)}")
