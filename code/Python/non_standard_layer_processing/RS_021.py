@@ -6,7 +6,7 @@ import re
 import pandas as pd
 from zipfile import ZipFile
 
-# RS_021 GIRES rivers
+# RS_021 GIRES Rivers
 
 # Import metadata sheet
 metadata = pd.read_excel(dirs.metadata_dir, sheet_name="AGOL_properties")
