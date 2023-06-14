@@ -9,7 +9,7 @@ from zipfile import ZipFile
 import logging
 
 # Set up logging config
-logging.basicConfig(filename='logfile_02.log', filemode="a", level=logging.INFO,
+logging.basicConfig(filename='logfile_02.log', filemode="w", level=logging.INFO,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger('EE-to-GDB logger')
 

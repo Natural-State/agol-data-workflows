@@ -1,6 +1,20 @@
 import agol_dirs as dirs
 from arcgis.gis import GIS
 import pandas as pd
+import logging
+
+# Set up logging config
+logging.basicConfig(filename='logfile_05.log', filemode="w", level=logging.INFO,
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger('Update-AGOL_properties logger')
+
+# Silence other loggers
+logger_azure = logging.getLogger("azure.core.pipeline.policies.http_logging_policy")
+logger_azure.setLevel(logging.WARNING)
+
+logger_arcgis = logging.getLogger("arcgis.geoprocessing._support")
+logger_arcgis.setLevel(logging.WARNING)
+
 
 # Connect to AGOL
 gis = GIS("https://naturalstate.maps.arcgis.com/", "dhenry_naturalstate", "mX!!49&aOfGNva")
@@ -14,17 +28,14 @@ metadata = metadata.set_index("Layer ID")
 # Choose layers to upload: sequence with start and end points
 # start, end = 59, 61
 # rs_layer_list = ["RS_{id:03d}".format(id=i) for i in range(start, end + 1)]
-# print(rs_layer_list)
 
 # Choose layers to upload: custom sequence
-layer_seq = [1]
+layer_seq = [41]
 rs_layer_list = ["RS_{id:03d}".format(id=i) for i in layer_seq]
-print(rs_layer_list)
-
 
 # i = rs_layer_list[0]
 for i in rs_layer_list:
-    print("STARTING RS LAYER: " + i)
+    logger.info(f"Starting RS group: {i}")
     data_type = metadata.at[i, "Data type"]
     if data_type == "Raster":
         layer_list = gis.content.search(query=i + "*", item_type="Image Service")
@@ -33,15 +44,15 @@ for i in rs_layer_list:
 
     # j = layer_list[0]
     for j in layer_list:
-        print("STARTING LAYER: " + j.title)
+        logger.info(f"Starting layer: {j.title}")
         tags = metadata.at[i, "Tags"].split(", ")
-        print(tags)
+        # print(tags)
         cats = "/Categories/" + metadata.at[i, "Categories"]
-        print(cats)
+        # print(cats)
         description = metadata.at[i, "Description"]
-        print(description)
+        # print(description)
         snippet = metadata.at[i, "Snippet"]
-        print(snippet)
+        # print(snippet)
 
         j.update(item_properties={
             "snippet": snippet,
@@ -63,5 +74,5 @@ for i in rs_layer_list:
         gis.content.categories.assign_to_items(items=[{j.itemid: {
             "categories": [cats]}}])
 
-        print("LAYER COMPLETE:" + j.title)
-    print("RS GROUP COMPLETE:" + i)
+        logger.info(f"Layer updated: {j.title}")
+    logger.info(f"RS group complete: {i}")

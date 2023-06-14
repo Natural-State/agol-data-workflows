@@ -5,6 +5,19 @@ import re
 import os
 import pandas as pd
 import glob
+import logging
+
+# Set up logging config
+logging.basicConfig(filename='logfile_04.log', filemode="w", level=logging.INFO,
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger('Import-to-AGOL logger')
+
+# Silence other loggers
+logger_azure = logging.getLogger("azure.core.pipeline.policies.http_logging_policy")
+logger_azure.setLevel(logging.WARNING)
+
+logger_arcgis = logging.getLogger("arcgis.geoprocessing._support")
+logger_arcgis.setLevel(logging.WARNING)
 
 # Connect to AGOL
 gis = GIS("https://naturalstate.maps.arcgis.com/", "dhenry_naturalstate", "mX!!49&aOfGNva")
@@ -16,18 +29,16 @@ metadata = pd.read_excel(dirs.metadata_dir, sheet_name="AGOL_properties")
 metadata = metadata.set_index("Layer ID")
 
 # Choose layers to upload: sequence with start and end points
-# start, end = 59, 61
-# rs_layer_list = ["RS_{id:03d}".format(id=i) for i in range(start, end + 1)]
-# print(rs_layer_list)
+start, end = 41, 46
+rs_layer_list = ["RS_{id:03d}".format(id=i) for i in range(start, end + 1)]
 
 # Choose layers to upload: custom sequence
-layer_seq = [1]
-rs_layer_list = ["RS_{id:03d}".format(id=i) for i in layer_seq]
-print(rs_layer_list)
+# layer_seq = [1]
+# rs_layer_list = ["RS_{id:03d}".format(id=i) for i in layer_seq]
 
 # i = rs_layer_list[0]
 for i in rs_layer_list:
-    print("STARTING RS LAYER: " + i)
+    logger.info(f"Starting layer: {i}")
     folder_dir = metadata.at[i, "GDB"]
     data_type = metadata.at[i, "Data type"]
     file_ext = "*.tif" if data_type == "Raster" else "*.zip"
@@ -36,18 +47,18 @@ for i in rs_layer_list:
 
     # j = layer_list[0]
     for j in layer_list:
-        print("STARTING FILE:" + j)
+        logger.info(f"Starting file: {j}")
         tags = metadata.at[i, "Tags"].split(", ")
-        print(tags)
+        # print(tags)
         cats = "/Categories/" + metadata.at[i, "Categories"]
-        print(cats)
+        # print(cats)
         description = metadata.at[i, "Description"]
-        print(description)
+        # print(description)
         snippet = metadata.at[i, "Snippet"]
-        print(snippet)
+        # print(snippet)
         match = re.search(r'\\([^\\]*)\.tif$', j) if data_type == "Raster" else re.search(r'\\([^\\]*)\.zip$', j)
         layer_name = match.group(1)
-        print(layer_name)
+        # print(layer_name)
 
         if data_type == "Raster":
             layer_search = gis.content.search(query=layer_name, item_type="Image Service")
@@ -72,7 +83,7 @@ for i in rs_layer_list:
 
                 gis.content.categories.assign_to_items(items=[{single_image_layer.itemid: {
                     "categories": [cats]}}])
-                print("LAYER UPLOADED: " + layer_name)
+                logger.info(f"Layer uploaded: {layer_name}")
 
             elif data_type == "Vector":
                 shp_file = gis.content.add({}, j)
@@ -91,19 +102,19 @@ for i in rs_layer_list:
 
                 gis.content.categories.assign_to_items(items=[{published_service.itemid: {
                     "categories": [cats]}}])
-                print("LAYER UPLOADED: " + layer_name)
+                logger.info(f"Layer uploaded: {layer_name}")
 
         elif len(layer_search) > 0:
-            print("LAYER ALREADY EXISTS")
-        print("FILE COMPLETE: " + j)
-    print("RS LAYER COMPLETE: " + i)
+            logger.warning(f"Layer already exists, delete layer and try again")
+        logger.info(f"File complete: {j}")
+    logger.info(f"RS layer complete: {i}")
 
 # Update GIS Catalog file
 metadata_file = gis.content.search(query="agol_layers_metadata")
 
 if len(metadata_file) == 0:
     metadata_file = gis.content.add({"snippet": "Metadata for remote sensing layers"}, dirs.metadata_dir)
-    print("Metadata uploaded")
+    logger.info("Metadata file uploaded successfully")
 else:
     metadata_file[0].update({"snippet": "Metadata for remote sensing layers"}, dirs.metadata_dir)
-    print("Metadata updated")
+    logger.info("Metadata file updated successfully")
