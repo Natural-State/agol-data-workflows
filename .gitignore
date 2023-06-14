@@ -24,3 +24,9 @@
 /Administrative.gdb/
 .Rproj.user
 /renv/
+/code/Python/*.log
+/.Rprofile
+/agol-data-workflows.aprx
+/agol-data-workflows.atbx
+/agol-data-workflows.Rproj
+/setting up git.txt
