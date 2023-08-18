@@ -34,3 +34,8 @@ arcpy.Delete_management('gHMv1_300m_2017_static')
 # Copy to API
 api_file_name = os.path.join(dirs.api_input_dir, re.sub(".gdb", "", gdb_name), outname + ".tif")
 arcpy.CopyRaster_management(in_raster=outname, out_rasterdataset=api_file_name)
+
+# Rename the band to match layer id (can't do this when layer is in GDB)
+rast = arcpy.Raster(api_file_name)
+rast.renameBand(1, outname)
+print(rast.bandNames)

@@ -96,6 +96,10 @@ for i in rs_layers:
         os.remove(api_file_name)
     arcpy.CopyRaster_management(in_raster=outname, out_rasterdataset=api_file_name)
 
+    # Rename the band to match layer id (can't do this when layer is in GDB)
+    rast = arcpy.Raster(api_file_name)
+    rast.renameBand(1, outname)
+
     end_processing = time.time()
     logger.info(f"Layer completed: {i}")
     logger.info(f"Total processing time for {i} (minutes): {str((end_processing - start_processing) / 60)}")

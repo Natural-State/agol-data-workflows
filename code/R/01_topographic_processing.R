@@ -23,9 +23,12 @@ library(sf)
 ## ________________________________________________________________________
 
 
-# Define boundary
+## Define boundary
 # boundary_select <-  "MKR_NS_buff_5km"
-boundary_select <-  "MKR_PACE"
+# boundary_select <-  "MKR_PACE"
+# boundary_select <-  "carbon_rs_aoi"
+boundary_select <-  "MKR"
+
 boundary <- vect(st_read("Boundaries.gdb", boundary_select)) %>%
  terra::project("epsg:4326")
 
@@ -33,21 +36,20 @@ boundary <- vect(st_read("Boundaries.gdb", boundary_select)) %>%
 metadata <- readxl::read_xlsx("agol_layers_metadata.xlsx", sheet = "AGOL_properties") %>%
  janitor::clean_names()
 
-elev_id <- metadata$layer_id[which(metadata$description == "Elevation")]
+elev_id <- metadata$layer_id[which(metadata$description == "Elevation 90m")]
 elevation <- rast(glue("H:/My Drive/GEE_exports/sent_to_gdb/{elev_id}_{boundary_select}.tif"))
 crs(elevation) <- "epsg:4326"
 
-elevation <- mask(elevation, boundary)
-elevation <- crop(elevation, boundary)
+elevation <- crop(elevation, boundary, mask = TRUE)
 plot(elevation)
 
-tri <- terra::terrain(elevation, v = "TRI")
+tri <- terra::terrain(elevation, v = "TRIriley", neighbors=8)
 plot(tri)
 
-tpi <- terra::terrain(elevation, v = "TPI")
+tpi <- terra::terrain(elevation, v = "TPI", neighbors=8)
 plot(tpi)
 
-rough <- terra::terrain(elevation, v = "roughness")
+rough <- terra::terrain(elevation, v = "roughness", neighbors=8)
 plot(rough)
 
 # TWI ---------------------------------------------------------------------
@@ -88,19 +90,25 @@ wbt_wetness_index(sca = "temporary_topo_data/flo_accum.tif",
                   slope = "temporary_topo_data/dem_slope.tif",
                   output = "temporary_topo_data/TWI.tif")
 
-twi <- terra::rast("temporary_topo_data/TWI.tif")
-plot(twi)
-
-twi <- terra::project(twi, "epsg:4326")
+twi <- terra::rast("temporary_topo_data/TWI.tif") |>
+ terra::project("epsg:4326")
 plot(twi)
 
 # Write files to API input folder -----------------------------------------
 
-terra::writeRaster(tri, glue("api_input/Topography/RS_008_{boundary_select}.tif"), overwrite = TRUE)
-terra::writeRaster(tpi,glue("api_input/Topography/RS_009_{boundary_select}.tif"), overwrite = TRUE)
-terra::writeRaster(twi, glue("api_input/Topography/RS_010_{boundary_select}.tif"), overwrite = TRUE)
-terra::writeRaster(rough, glue("api_input/Topography/RS_011_{boundary_select}.tif"), overwrite = TRUE)
+names(tri) <- glue("RS_008_{boundary_select}")
+names(tpi) <- glue("RS_009_{boundary_select}")
+names(twi) <- glue("RS_010_{boundary_select}")
+names(rough) <- glue("RS_011_{boundary_select}")
 
+terra::writeRaster(tri, glue("api_input/Topography/RS_008_{boundary_select}.tif"),
+                   overwrite = TRUE)
+terra::writeRaster(tpi,glue("api_input/Topography/RS_009_{boundary_select}.tif"),
+                   overwrite = TRUE)
+terra::writeRaster(twi, glue("api_input/Topography/RS_010_{boundary_select}.tif"),
+                   overwrite = TRUE)
+terra::writeRaster(rough, glue("api_input/Topography/RS_011_{boundary_select}.tif"),
+                   overwrite = TRUE)
 
 # Delete temp topo folder -------------------------------------------------
 unlink("temporary_topo_data", recursive = TRUE)
