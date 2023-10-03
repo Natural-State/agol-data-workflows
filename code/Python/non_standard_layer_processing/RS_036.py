@@ -19,7 +19,7 @@ arcpy.Clip_management(in_raster=ghm_raw, out_raster=os.path.join(gdb_dir, "gHMv1
                       in_template_dataset=os.path.join(os.path.join(dirs.proj_dir,
                                                                     "Boundaries.gdb", dirs.clip_boundary_name)),
                       clipping_geometry="ClippingGeometry",
-                      nodata_value=0, maintain_clipping_extent="NO_MAINTAIN_EXTENT")
+                      nodata_value="nan", maintain_clipping_extent="NO_MAINTAIN_EXTENT")
 
 arcpy.env.workspace = gdb_dir
 
@@ -33,9 +33,12 @@ arcpy.Delete_management('gHMv1_300m_2017_static')
 
 # Copy to API
 api_file_name = os.path.join(dirs.api_input_dir, re.sub(".gdb", "", gdb_name), outname + ".tif")
+if os.path.exists(api_file_name):
+    os.remove(api_file_name)
 arcpy.CopyRaster_management(in_raster=outname, out_rasterdataset=api_file_name)
 
 # Rename the band to match layer id (can't do this when layer is in GDB)
 rast = arcpy.Raster(api_file_name)
+rast.renameBand(1, "temp")
 rast.renameBand(1, outname)
 print(rast.bandNames)
