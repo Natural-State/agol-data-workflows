@@ -2,6 +2,7 @@ import agol_dirs as dirs
 from arcgis.gis import GIS
 import pandas as pd
 import logging
+from agol_credentials import agol_username, agol_password
 
 # Set up logging config
 logging.basicConfig(filename='logfile_05.log', filemode="w", level=logging.INFO,
@@ -15,9 +16,8 @@ logger_azure.setLevel(logging.WARNING)
 logger_arcgis = logging.getLogger("arcgis.geoprocessing._support")
 logger_arcgis.setLevel(logging.WARNING)
 
-
 # Connect to AGOL
-gis = GIS("https://naturalstate.maps.arcgis.com/", "dhenry_naturalstate", "mX!!49&aOfGNva")
+gis = GIS("https://naturalstate.maps.arcgis.com/", agol_username, agol_password)
 type(gis)
 gis.admin.license.all()
 
