@@ -2,6 +2,7 @@ import agol_dirs as dirs
 from arcgis.gis import GIS
 import pandas as pd
 import logging
+from agol_credentials import agol_username, agol_password
 
 # Set up logging config
 logging.basicConfig(filename='logfile_06.log', filemode="w", level=logging.INFO,
@@ -16,7 +17,7 @@ logger_arcgis = logging.getLogger("arcgis.geoprocessing._support")
 logger_arcgis.setLevel(logging.WARNING)
 
 # Connect to AGOL
-gis = GIS("https://naturalstate.maps.arcgis.com/", "dhenry_naturalstate", "mX!!49&aOfGNva")
+gis = GIS("https://naturalstate.maps.arcgis.com/", agol_username, agol_password)
 type(gis)
 gis.admin.license.all()
 
@@ -25,13 +26,12 @@ metadata = pd.read_excel(dirs.metadata_dir, sheet_name="AGOL_properties")
 metadata = metadata.set_index("Layer ID")
 
 # Choose layers to upload: sequence with start and end points
-# start, end = 59, 61
-# rs_layer_list = ["RS_{id:03d}".format(id=i) for i in range(start, end + 1)]
-# print(rs_layer_list)
+start, end = 12, 13
+rs_layer_list = ["RS_{id:03d}".format(id=i) for i in range(start, end + 1)]
 
-# Choose layers to upload: custom sequence
-layer_seq = [41, 42]
-rs_layer_list = ["RS_{id:03d}".format(id=i) for i in layer_seq]
+# Choose layers to delete: custom sequence
+# layer_seq = [41, 42]
+# rs_layer_list = ["RS_{id:03d}".format(id=i) for i in layer_seq]
 
 # i = rs_layer_list[0]
 for i in rs_layer_list:

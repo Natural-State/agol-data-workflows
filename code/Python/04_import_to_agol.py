@@ -6,6 +6,7 @@ import os
 import pandas as pd
 import glob
 import logging
+from agol_credentials import agol_username, agol_password
 
 # Set up logging config
 logging.basicConfig(filename='logfile_04.log', filemode="w", level=logging.INFO,
@@ -20,7 +21,7 @@ logger_arcgis = logging.getLogger("arcgis.geoprocessing._support")
 logger_arcgis.setLevel(logging.WARNING)
 
 # Connect to AGOL
-gis = GIS("https://naturalstate.maps.arcgis.com/", "dhenry_naturalstate", "mX!!49&aOfGNva")
+gis = GIS("https://naturalstate.maps.arcgis.com/", agol_username, agol_password)
 type(gis)
 gis.admin.license.all()
 
@@ -29,7 +30,9 @@ metadata = pd.read_excel(dirs.metadata_dir, sheet_name="AGOL_properties")
 metadata = metadata.set_index("Layer ID")
 
 # Choose layers to upload: sequence with start and end points
-start, end = 41, 46
+
+# 57 not working - check actual data.
+start, end = 76, 76
 rs_layer_list = ["RS_{id:03d}".format(id=i) for i in range(start, end + 1)]
 
 # Choose layers to upload: custom sequence
