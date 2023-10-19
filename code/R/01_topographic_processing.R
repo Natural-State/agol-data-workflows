@@ -22,21 +22,19 @@ library(sf)
 
 ## ________________________________________________________________________
 
-
 ## Define boundary
-# boundary_select <-  "MKR_NS_buff_5km"
-# boundary_select <-  "MKR_PACE"
-# boundary_select <-  "carbon_rs_aoi"
-boundary_select <-  "MKR"
+boundary_select <-  "LLBN"
 
 boundary <- vect(st_read("Boundaries.gdb", boundary_select)) %>%
  terra::project("epsg:4326")
 
 # Read in metadata
-metadata <- readxl::read_xlsx("agol_layers_metadata.xlsx", sheet = "AGOL_properties") %>%
+md_path <- "C:/Users/DominicH/OneDrive - Natural State/Shared Documents - Data Science Division/General/AGOL/agol_layers_metadata_10-2023.xlsx"
+
+metadata <- readxl::read_xlsx(md_path, sheet = "AGOL_properties") %>%
  janitor::clean_names()
 
-elev_id <- metadata$layer_id[which(metadata$description == "Elevation 90m")]
+elev_id <- metadata$layer_id[which(metadata$layer_name == "Elevation 90m")]
 elevation <- rast(glue("H:/My Drive/GEE_exports/sent_to_gdb/{elev_id}_{boundary_select}.tif"))
 crs(elevation) <- "epsg:4326"
 
