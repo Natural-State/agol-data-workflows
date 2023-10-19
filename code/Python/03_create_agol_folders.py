@@ -22,9 +22,8 @@ agol_folders = sorted(set(metadata["GDB"].tolist()),  key=str.casefold)
 for i in agol_folders:
     gis.content.create_folder(i)
 
-# List of categories to add manually (make sure there are no typos when adding categories)
-agol_cats = sorted(set(metadata["Categories"].tolist()),  key=str.casefold)
+# List of categories to add manually (beware of typos)
+agol_cats = metadata["Realm"] + "/" + metadata["Content"].fillna("") + "/" + metadata["Label"].fillna("")
+agol_cats = sorted(set(agol_cats.tolist()), key=str.casefold)
 for i in agol_cats:
     logger.info(f"Add this category by hand: {i}")
-
-
