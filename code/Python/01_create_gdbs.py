@@ -12,6 +12,12 @@ logger = logging.getLogger('Create-GDBs logger')
 metadata = pd.read_excel(dirs.metadata_dir, sheet_name="AGOL_properties")
 gdb_list = metadata["GDB"].unique().tolist()
 
+# Create "sent_to_gdb" folder within GEE exports
+if os.path.exists(os.path.join(dirs.gee_dir, "sent_to_gdb")):
+    logger.warning(f"Sent to GDB folder already exists")
+else:
+    os.mkdir(os.path.join(dirs.gee_dir, "sent_to_gdb"))
+
 # Create API input parent folder
 if os.path.exists(os.path.join(dirs.proj_dir, dirs.api_input_dir)):
     logger.warning(f"API folder already exists")
@@ -33,7 +39,7 @@ if os.path.exists(os.path.join(dirs.proj_dir, "Boundaries.gdb")):
     logger.warning("Boundaries.gdb already exists")
 else:
     arcpy.CreateFileGDB_management(out_folder_path=dirs.proj_dir, out_name="Boundaries.gdb")
-    aoi_filepath = r"H:\My Drive\GEE_assets\MKR.shp"
+    aoi_filepath = r"H:\My Drive\GEE_assets\LLBN.shp"
     arcpy.FeatureClassToGeodatabase_conversion(Input_Features=aoi_filepath,
                                                Output_Geodatabase=os.path.join(dirs.proj_dir, "Boundaries.gdb"))
     logger.info("Boundaries.gdb created and AOI imported")
