@@ -28,16 +28,15 @@ gis.admin.license.all()
 # Read in metadata
 metadata = pd.read_excel(dirs.metadata_dir, sheet_name="AGOL_properties")
 metadata = metadata.set_index("Layer ID")
+metadata = metadata.fillna("")
 
 # Choose layers to upload: sequence with start and end points
-
-# 57 not working - check actual data.
-start, end = 76, 76
-rs_layer_list = ["RS_{id:03d}".format(id=i) for i in range(start, end + 1)]
+# start, end = 76, 76
+# rs_layer_list = ["RS_{id:03d}".format(id=i) for i in range(start, end + 1)]
 
 # Choose layers to upload: custom sequence
-# layer_seq = [1]
-# rs_layer_list = ["RS_{id:03d}".format(id=i) for i in layer_seq]
+layer_seq = [1]
+rs_layer_list = ["RS_{id:03d}".format(id=i) for i in layer_seq]
 
 # i = rs_layer_list[0]
 for i in rs_layer_list:
@@ -53,14 +52,16 @@ for i in rs_layer_list:
         logger.info(f"Starting file: {j}")
         tags = metadata.at[i, "Tags"].split(", ")
         # print(tags)
-        cats = "/Categories/" + metadata.at[i, "Categories"]
+        cats = "/Categories/" + metadata.at[i, "Realm"] + "/" + metadata.at[i, "Content"] + "/" + metadata.at[i, "Label"]
+        cats = cats.rstrip("/")
         # print(cats)
         description = metadata.at[i, "Description"]
         # print(description)
-        snippet = metadata.at[i, "Snippet"]
+        snippet = metadata.at[i, "Layer Name"]
         # print(snippet)
         match = re.search(r'\\([^\\]*)\.tif$', j) if data_type == "Raster" else re.search(r'\\([^\\]*)\.zip$', j)
         layer_name = match.group(1)
+        layer_name = layer_name.replace(i + "_" + dirs.clip_boundary_name, metadata.at[i, "Layer Shortname"])
         # print(layer_name)
 
         if data_type == "Raster":
@@ -76,7 +77,7 @@ for i in rs_layer_list:
                                                  gis=gis)
 
                 single_image_layer.update(item_properties={
-                    # "title": "new_title",
+                    "title": layer_name,
                     "snippet": snippet,
                     "description": description,
                     "tags": tags,
@@ -95,7 +96,7 @@ for i in rs_layer_list:
                 shp_file.move(folder_dir)
 
                 published_service.update(item_properties={
-                    # "title": "new_title",
+                    "title": layer_name,
                     "snippet": snippet,
                     "description": description,
                     "tags": tags,

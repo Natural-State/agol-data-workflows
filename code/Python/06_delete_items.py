@@ -26,7 +26,7 @@ metadata = pd.read_excel(dirs.metadata_dir, sheet_name="AGOL_properties")
 metadata = metadata.set_index("Layer ID")
 
 # Choose layers to upload: sequence with start and end points
-start, end = 12, 13
+start, end = 1, 1
 rs_layer_list = ["RS_{id:03d}".format(id=i) for i in range(start, end + 1)]
 
 # Choose layers to delete: custom sequence
@@ -37,12 +37,12 @@ rs_layer_list = ["RS_{id:03d}".format(id=i) for i in range(start, end + 1)]
 for i in rs_layer_list:
     logger.info(f"Starting RS layer: {i}")
     data_type = metadata.at[i, "Data type"]
-
+    query_str = metadata.at[i, "Layer Shortname"]
     if data_type == "Raster":
-        layer_list = gis.content.search(query=i + "*", item_type="Image Service")
+        layer_list = gis.content.search(query=query_str + "*", item_type="Image Service", max_items=200)
     elif data_type == "Vector":
-        feature_list = gis.content.search(query=i + "*", item_type="Feature Layer")
-        shp_list = gis.content.search(query=i + "*", item_type="Shapefile")
+        feature_list = gis.content.search(query=query_str + "*", item_type="Feature Layer", max_items=200)
+        shp_list = gis.content.search(query=query_str + "*", item_type="Shapefile", max_items=200)
         layer_list = [feature_list[0], shp_list[0]] if len(feature_list) > 0 else []
     else:
         layer_list = []
