@@ -24,13 +24,14 @@ gis.admin.license.all()
 # Read in metadata
 metadata = pd.read_excel(dirs.metadata_dir, sheet_name="AGOL_properties")
 metadata = metadata.set_index("Layer ID")
+metadata = metadata.fillna("")
 
 # Choose layers to upload: sequence with start and end points
-start, end = 1, 1
+start, end = 74, 74
 rs_layer_list = ["RS_{id:03d}".format(id=i) for i in range(start, end + 1)]
 
 # Choose layers to delete: custom sequence
-# layer_seq = [41, 42]
+# layer_seq = [21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 39, 40, 53, 71]
 # rs_layer_list = ["RS_{id:03d}".format(id=i) for i in layer_seq]
 
 # i = rs_layer_list[0]
