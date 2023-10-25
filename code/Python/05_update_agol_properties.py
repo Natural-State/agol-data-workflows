@@ -27,12 +27,12 @@ metadata = metadata.set_index("Layer ID")
 metadata = metadata.fillna("")
 
 # Choose layers to upload: sequence with start and end points
-# start, end = 59, 61
-# rs_layer_list = ["RS_{id:03d}".format(id=i) for i in range(start, end + 1)]
+start, end = 1, 77
+rs_layer_list = ["RS_{id:03d}".format(id=i) for i in range(start, end + 1)]
 
 # Choose layers to upload: custom sequence
-layer_seq = [1]
-rs_layer_list = ["RS_{id:03d}".format(id=i) for i in layer_seq]
+# layer_seq = [1]
+# rs_layer_list = ["RS_{id:03d}".format(id=i) for i in layer_seq]
 
 # i = rs_layer_list[0]
 for i in rs_layer_list:
@@ -65,15 +65,6 @@ for i in rs_layer_list:
             "accessInformation": "Natural State (add citation).",
             "licenseInfo": "This layer is licensed under the GNU General Public License v3.0."
         })
-
-        # Add thumbnail
-        # j.update(item_properties={
-        #     "snippet": snippet,
-        #     "description": description,
-        #     "tags": tags,
-        #     "accessInformation": "Natural State (citation).",
-        #     "licenseInfo": "This layer is licensed under the GNU General Public License v3.0."
-        # }, thumbnail=r"H:\My Drive\ArcPro projects\GEE export layers\thumbnails\thumb_npp.png")
 
         gis.content.categories.assign_to_items(items=[{j.itemid: {
             "categories": [cats]}}])
