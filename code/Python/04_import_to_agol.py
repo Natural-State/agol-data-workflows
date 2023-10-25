@@ -31,7 +31,7 @@ metadata = metadata.set_index("Layer ID")
 metadata = metadata.fillna("")
 
 # Choose layers to upload: sequence with start and end points
-# start, end = 76, 76
+# start, end = 39, 39
 # rs_layer_list = ["RS_{id:03d}".format(id=i) for i in range(start, end + 1)]
 
 # Choose layers to upload: custom sequence
@@ -95,6 +95,15 @@ for i in rs_layer_list:
                 published_service.move(folder_dir)
                 shp_file.move(folder_dir)
 
+                shp_file.update(item_properties={
+                    "title": layer_name,
+                    "snippet": snippet,
+                    "description": description,
+                    "tags": tags,
+                    "accessInformation": "Natural State",
+                    "licenseInfo": "This layer is licensed under the GNU General Public License v3.0."
+                })
+
                 published_service.update(item_properties={
                     "title": layer_name,
                     "snippet": snippet,
@@ -106,6 +115,10 @@ for i in rs_layer_list:
 
                 gis.content.categories.assign_to_items(items=[{published_service.itemid: {
                     "categories": [cats]}}])
+
+                gis.content.categories.assign_to_items(items=[{shp_file.itemid: {
+                    "categories": [cats]}}])
+
                 logger.info(f"Layer uploaded: {layer_name}")
 
         elif len(layer_search) > 0:
