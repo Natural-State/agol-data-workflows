@@ -39,7 +39,6 @@ if os.path.exists(os.path.join(dirs.proj_dir, "Boundaries.gdb")):
     logger.warning("Boundaries.gdb already exists")
 else:
     arcpy.CreateFileGDB_management(out_folder_path=dirs.proj_dir, out_name="Boundaries.gdb")
-    aoi_filepath = r"H:\My Drive\GEE_assets\LLBN.shp"
     arcpy.FeatureClassToGeodatabase_conversion(Input_Features=aoi_filepath,
                                                Output_Geodatabase=os.path.join(dirs.proj_dir, "Boundaries.gdb"))
     logger.info("Boundaries.gdb created and AOI imported")

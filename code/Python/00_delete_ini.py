@@ -1,3 +1,4 @@
+# This script may be necessary if you are working with google drive folders. Google drive creates .ini configuration files that may need to be deleted for the workflow to work.
 import os
 
 ini_list = []
