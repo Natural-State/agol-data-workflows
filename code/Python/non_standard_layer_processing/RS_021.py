@@ -27,7 +27,20 @@ arcpy.Clip_analysis(in_features=os.path.join(gires_gdb_dir, "GIRES_v10_rivers"),
 arcpy.FeatureClassToGeodatabase_conversion(Input_Features=os.path.join(gires_gdb_dir, outname),
                                            Output_Geodatabase=os.path.join(dirs.proj_dir, gdb_name))
 
-# Copy to API input folder
+# Create distance to river raster
+river_rast_name = f"RS_079_{dirs.clip_boundary_name}"
+arcpy.env.workspace = os.path.join(dirs.proj_dir, gdb_name)
+utm_proj = arcpy.SpatialReference(32637)
+arcpy.env.outputCoordinateSystem = utm_proj
+arcpy.env.cellSize = 100
+arcpy.env.cellSizeProjectionMethod = "CONVERT_UNITS"
+
+river_dist = arcpy.sa.DistanceAccumulation(in_source_data=outname)
+river_dist.save("river_dist_proj")
+arcpy.ProjectRaster_management("river_dist_proj", river_rast_name, out_coor_system=4326)
+arcpy.Delete_management("river_dist_proj")
+
+# Copy GIRES river vector file to API input folder
 arcpy.env.workspace = gires_gdb_dir
 api_folder = os.path.join(dirs.api_input_dir, re.sub(".gdb", "", gdb_name))
 arcpy.FeatureClassToShapefile_conversion(Input_Features=outname, Output_Folder=api_folder)
@@ -44,3 +57,16 @@ with ZipFile(zip_filename, "w") as zip:
     for file in vector_files:
         base_name = os.path.basename(file)
         zip.write(file, arcname=base_name)
+
+# Copy GIRES distance to river raster file API input folder
+arcpy.env.workspace = os.path.join(dirs.proj_dir, gdb_name)
+api_file_name = os.path.join(dirs.api_input_dir, re.sub(".gdb", "", gdb_name), river_rast_name + ".tif")
+if os.path.exists(api_file_name):
+    os.remove(api_file_name)
+arcpy.CopyRaster_management(in_raster=river_rast_name, out_rasterdataset=api_file_name)
+
+# Rename the band to match layer id (can't do this when layer is in GDB)
+rast = arcpy.Raster(api_file_name)
+rast.renameBand(1, "temp")
+rast.renameBand(1, river_rast_name)
+print(rast.bandNames)
