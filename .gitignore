@@ -35,4 +35,11 @@
 /.Rhistory
 /Climate.gdb/
 /agol_credentials.py
+code/R/.Rhistory
+*.log
+*.xml
+agol_dirs.py
+*.pyc
+agol_dirs.py
+.idea/.name
 /LULC.gdb/

@@ -35,7 +35,7 @@ metadata = metadata.fillna("")
 # rs_layer_list = ["RS_{id:03d}".format(id=i) for i in range(start, end + 1)]
 
 # Choose layers to upload: custom sequence
-layer_seq = [1]
+layer_seq = [78]
 rs_layer_list = ["RS_{id:03d}".format(id=i) for i in layer_seq]
 
 # i = rs_layer_list[0]

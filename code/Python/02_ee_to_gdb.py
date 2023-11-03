@@ -20,7 +20,7 @@ metadata = metadata.set_index("Layer ID")
 # Define which RS layers need to be processed (rs_layer_list = ["RS_005"])
 
 # Choose layer start and end points
-start, end = 13, 13
+start, end = 78, 78
 rs_layer_list = ["RS_{id:03d}".format(id=i) for i in range(start, end + 1)]
 
 # Alternative specification using layer sequence
